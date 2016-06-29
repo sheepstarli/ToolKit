@@ -1,4 +1,4 @@
-package com.lcx;
+package com.lcx.controller;
 
 import java.io.IOException;
 import java.util.Map;
