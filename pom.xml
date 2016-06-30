@@ -22,6 +22,7 @@
 		<start-class>com.lcx.ToolKitApplication</start-class>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.8</java.version>
+		<kefu.version>43.7.0-SNAPSHOT</kefu.version>
 	</properties>
 	<build>
         <resources>
@@ -66,6 +67,16 @@
         </plugins>
     </build>
 	<dependencies>
+		<dependency>
+			<groupId>com.easemob.kefu</groupId>
+			<artifactId>kefu-commons</artifactId>
+			<version>${kefu.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.easemob.kefu</groupId>
+			<artifactId>kefu-services-api</artifactId>
+			<version>${kefu.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>

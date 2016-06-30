@@ -1,14 +1,22 @@
 package com.lcx.config;
 
+import java.net.URISyntaxException;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
+import com.easemob.weichat.service.message.BlockingRedisMessageConsumer;
+import com.easemob.weichat.service.message.IMessageConsumer;
 import com.lcx.handler.MainHandler;
-
-import lombok.extern.slf4j.Slf4j;
+import com.lcx.service.MessageDistributeWorker;
+import com.lcx.service.WebSocketSessionManager;
 
 /**
  * http://docs.spring.io/spring/docs/current/spring-framework-reference/html/websocket.html
@@ -17,11 +25,13 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Configuration
 @EnableWebSocket
-@Slf4j
 public class WebSocketConfig implements WebSocketConfigurer {
 
 	@Autowired
 	private MainHandler mainHandler;
+	
+	@Autowired
+    private MetricRegistry metricRegistry;
 	
 	@Override
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
@@ -31,5 +41,15 @@ public class WebSocketConfig implements WebSocketConfigurer {
 			.withSockJS();
 	}
 	
+	@Bean
+    public IMessageConsumer messageDistributeConsumer(StringRedisTemplate redisTemplate, WebSocketSessionManager webScoketSessionManager) throws URISyntaxException {
+		MessageDistributeWorker worker = new MessageDistributeWorker(webScoketSessionManager);
+		Timer timer = metricRegistry.timer("pusherservice.message.consumer.timer");
+        BlockingRedisMessageConsumer cs = new BlockingRedisMessageConsumer(
+                redisTemplate,
+                "pushservice:data", 1, timer);
+        cs.start(worker);
+        return cs;
+	}
 
 }

@@ -6,8 +6,9 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
+import com.easemob.weichat.models.util.JSONUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.lcx.util.JSONUtil;
+import com.lcx.consts.SessionFSMConsts;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,9 +18,6 @@ public class AuthenticatedSessionFSM extends AbstractSessionFSM {
 	public AuthenticatedSessionFSM(SessionFSMManager sessionFSMManager) {
 		this.sessionFSMManager = sessionFSMManager;
 	}
-
-	private static final String AUTHORIZATION_KEY = "path";
-	private static final String AUTHORIZE_REQUEST = "{\"authorize\":\"path\"}";
 
 	@Override
 	public void handleMessage(WebSocketSession session, TextMessage message) {
@@ -34,14 +32,16 @@ public class AuthenticatedSessionFSM extends AbstractSessionFSM {
 			closeSession(session, CloseStatus.GOING_AWAY);
 			return ;
 		}
-		if (!map.containsKey(AUTHORIZATION_KEY)) {
+		if (!map.containsKey(SessionFSMConsts.PATH)) {
 			closeSession(session, CloseStatus.GOING_AWAY);
 		}
 		
 		//TODO check the path
-		String path = (String) map.get(AUTHORIZATION_KEY);
+		String path = (String) map.get(SessionFSMConsts.PATH);
+		sendMessage(session, SessionFSMConsts.AUTHORIZED_RESPONSE);
 		
-		session.getAttributes().put(AUTHORIZATION_KEY, path);
+		//设置到session中
+		session.getAttributes().put(SessionFSMConsts.PATH, path);
 		
 		//更改状态
 		sessionFSMManager.changeState(session, new AuthorisedSessionFSM(sessionFSMManager));
@@ -49,7 +49,7 @@ public class AuthenticatedSessionFSM extends AbstractSessionFSM {
 
 	@Override
 	public void firstCall(WebSocketSession session) {
-		sendMessage(session, AUTHORIZE_REQUEST);
+		sendMessage(session, SessionFSMConsts.AUTHORIZED_REQUEST);
 	}
 
 }

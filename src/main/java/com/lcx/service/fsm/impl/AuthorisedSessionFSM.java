@@ -14,7 +14,7 @@ public class AuthorisedSessionFSM extends AbstractSessionFSM {
 	
 	@Override
 	public void handleMessage(WebSocketSession session, TextMessage message) {
-		log.info("AuthorisedSessionFSM handleMessage:{}", message.getPayload());
+//		log.info("AuthorisedSessionFSM handleMessage:{}", message.getPayload());
 	}
 
 	@Override

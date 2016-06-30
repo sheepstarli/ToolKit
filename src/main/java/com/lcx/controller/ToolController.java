@@ -1,13 +1,13 @@
 package com.lcx.controller;
 
 import java.io.IOException;
-import java.util.Map;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.lcx.service.WebSocketSessionManager;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -55,5 +57,20 @@ public class ToolController {
 			@RequestBody String body) {
 		log.info("receive {}: {}", eventType, body);
 		return new ResponseEntity<ToolController.ResponseData>(new ResponseData(), HttpStatus.OK);
+	}
+	
+	
+	
+	@Autowired
+	private WebSocketSessionManager webSocketSessionManager;
+	
+	@RequestMapping(value = "/tools/websocket/sessionmanager/count", method = RequestMethod.GET)
+	public ResponseEntity<Object> sessionCount() {
+		return new ResponseEntity<Object>(webSocketSessionManager.countSession(), HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/tools/websocket/sessionmanager/agentsessions", method = RequestMethod.GET)
+	public ResponseEntity<Object> getAgentSessions() {
+		return new ResponseEntity<Object>(webSocketSessionManager.getAgentSessions(), HttpStatus.OK);
 	}
 }
